@@ -1,4 +1,4 @@
-To implement redux in any of the react application, 
+To implement redux in any of the react application, we need to take care of following things.
 In Redux, we need to implement three things, 
 1.Actions, 
 2.ReducerFunction
