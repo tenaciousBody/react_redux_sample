@@ -1,70 +1,91 @@
-# Getting Started with Create React App
+To implement redux in any of the react application, 
+In Redux, we need to implement three things, 
+1.Actions, 
+2.ReducerFunction
+3.Store
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Store is a container which holds the entires state of your application. Reducer function is the one which describes how the state of the application will get changed
+based on the action disapteched by the application. 
+As applications subscribes the changes happening for the states reside in the redux store. Application is aware of these state changes.
 
-## Available Scripts
+we need to add following dependencies in our react application - 
+    "redux": "^4.0.4",
+    "redux-logger": "^3.0.6",
+    "redux-thunk": "^2.3.0",
+    "react-redux": "^8.0.1",
+    
+Once Dependencies are added, we should follow below steps;
+* create action types within you application for the action creators.
+* Obce action types are created, create action creators by using the action types. Action creators are actions based on which state of your application will be updated.
+Below is the sample code for action creators and action types. 
+/* action types*/
 
-In the project directory, you can run:
+export const BUY_CAKE = 'BUY_CAKE'
 
-### `npm start`
+/*action creators*/
+export const buyCake = (number = 1) => {
+  return {
+    type: BUY_CAKE,
+    payload: number
+  }
+}
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+* once you are done with the action creators, you need to create reducer function for your component, it takes two argument, initial state and the actions. reducer function describes how state of your application will be changing based on the actions dispatched by the react component. 
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Below is the sample code for a reducer function
 
-### `npm test`
+/* reducer*/
+const cakeReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case BUY_CAKE: return {
+      ...state,
+      numOfCakes: state.numOfCakes - action.payload
+    }
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+    default: return state
+  }
+}
 
-### `npm run build`
+*Post that, Store needs to be created and below is the sample code for that. 
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+import { createStore, applyMiddleware } from 'redux'
+import { composeWithDevTools } from 'redux-devtools-extension'
+import logger from 'redux-logger'
+import thunk from 'redux-thunk'
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+import rootReducer from './rootReducer'
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+const store = createStore(
+  rootReducer,
+  composeWithDevTools(applyMiddleware(logger, thunk))
+)
 
-### `npm run eject`
+*Once store is created we need to provide it to the component wraaped in App.js like below
+  <Provider store={store}>
+      <div className='App'>
+        <UsersContainer />
+      </div>
+    </Provider>
+    
+*Till this point, we have defined actions, reducer function as well as redux store for our application. 
+* Now, we need to connect our components to redux store & below is the code for the same. 
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+/*code to connect your component with the redux store */
+//mapStateToProps return a variable which represents the current state of your application
+const mapStateToProps = state => {
+  return {
+    userData: state.user
+  }
+}
+//mapDispatchToProps also returns a variable via which you can dispatch actions(the actions you defined earlier) from your component.
+const mapDispatchToProps = dispatch => {
+  return {
+    fetchUsers: () => dispatch(fetchUsers())
+  }
+}
+we can access userData and fetchUsers as props in our component.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(UsersContainer)
